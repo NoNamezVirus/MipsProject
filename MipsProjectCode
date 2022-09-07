@@ -1,0 +1,263 @@
+# Date: 10/25/2021
+# Author: Ethan Schnaak
+# 
+# Description: This program will prompt the user to enter three positive or negative integers,
+# it will then display the sum of the two largest numbers entered and it will also display
+# both the largest and smallest numbers entered.
+# 
+# Input: Three integers that are entered by the user.
+# 
+# Output: The sum of the two largest numbers and the largest and smallest numbers entered.
+##################################################################################################
+
+
+#########################Data##############################
+
+.data
+str1: .asciiz "Enter the first integer: "
+str2: .asciiz "Enter the second integer: "
+str3: .asciiz "Enter the third integer: "
+str4: .asciiz "The sum of the two largest numbers are: "
+str5: .asciiz "\nThe largest number is: "
+str6: .asciiz "\nThe the smallest number is: "
+
+##########################Code##############################
+
+.text
+.globl main
+
+main:
+li $v0, 4
+la $a0, str1
+syscall # Prints the first message
+
+li $v0, 5
+syscall # Prompt the user to enter the first integer
+
+move $t0, $v0 # Store the first integer in $t0
+li $v0, 4
+la $a0, str2
+syscall # Print the second message
+
+li $v0, 5
+syscall # Prompt the user to enter the second integer
+
+move $t1, $v0 # Store the second integer in $t1
+li $v0, 4
+la $a0, str3
+syscall # Print the third message
+
+li $v0, 5
+syscall # Prompt the user to enter the third integer
+
+move $t2, $v0 # Store the third integer in $t2
+slt $s0, $t0, $t1 # Checks if the first integer is less than the second integer
+beq $s0, $zero, L1 # Branch to L1 if the first integer is greater than the second integer
+bne $s0, $zero, L2 # Branch to L2 if the first integer is less than the second integer
+
+L1:
+slt $s0, $t1, $t2 # Checks if the second integer is less than the third integer
+beq $s0, $zero, Sum1 # Branch to Sum1 if the second integer is greater than the third integer
+bne $s0, $zero, Sum2 # Branch to Sum2 if the second integer is less than the third integer
+
+L2:
+slt $s0, $t0, $t2 # Checks if the first integer is less than the third integer
+beq $s0, $zero, Sum1 # Branch to Sum1 if the first integer is greater than the third integer
+bne $s0, $zero, Sum3 # Branch to Sum3 if the first integer is less than the third integer
+
+Sum1:
+li $v0, 4
+la $a0, str4
+syscall # Prints out the message for the sum
+
+add $a0, $t0, $t1 # Add the two largest numbers together 
+li $v0, 1
+syscall # Prints out the sum of the two largest numbers
+
+bne $v0, $zero, Exit # Branch to Exit
+
+Sum2:
+li $v0, 4
+la $a0, str4 # Prints out the message for the sum
+syscall
+
+add $a0, $t0, $t2 # Add the two largest numbers together
+li $v0, 1
+syscall # Prints out the sum of the two largest numbers
+
+bne $v0, $zero, Exit # Branch to Exit
+
+Sum3:
+li $v0, 4
+la $a0, str4 # Prints out the message for the sum
+syscall
+
+add $a0, $t1, $t2 # Add the two largest numbers together
+li $v0, 1
+syscall # Prints out the sum of the two largest numbers
+
+bne $v0, $zero, Exit # Branch to Exit
+
+Exit:
+slt $s0, $t0, $t1 # Check if the first integer is less than the second integer ($t0 < $t1)
+beq $s0, $zero, L3 # Branch to L3 if the first integer is greater than the second integer
+bne $s0, $zero, L4 # Branch to L4 if the first integer is less than the second integer
+
+L3:
+slt $s0, $t1, $t2 # Check if the second integer is less than the third integer ($t1 < $t2)
+beq $s0, $zero, End1 # Branch to End1 to set up ($t0 > $t1 > $t2)
+slt $s0, $t0, $t2 # Check if the first integer is less than the third integer
+beq $s0, $zero, End2 # Branch to End2 to set up ($t0 > $t2 > $t1)
+bne $s0, $zero, End3 # Branch to End3 to set up ($t2 > $t0 > $t1)
+
+L4:
+slt $s0, $t1, $t2 # Check if the second integer is less than the third integer ($t1 < $t2) 
+bne $s0, $zero, End4 # Branch to End4 to set up ($t2 > $t1 > $t0)
+slt $s0, $t0, $t2 # Check if the first integer is less than the third integer
+bne $s0, $zero, End5 # Branch to End5 to set up ($t1 > $t2 > $t0)
+beq $s0, $zero, End6 # Branch to End6 to set up ($t1 > $t0 > $t2)
+
+######################################################################################
+#                                                                                    #
+#                                                                                    #
+# Condition testing for each register possibility of the largest and smallest number #
+# The goal here is to cycle through the possibilities of each of the three registers #
+# as the smallest and the largest                                                    #
+#                                                                                    #
+######################################################################################
+
+End1:
+
+## We have $t0 > $t1 > $t2
+
+li $v0, 4
+la $a0, str5
+syscall # Print out the message for the largest number
+
+addi $a0, $t0, 0 # Add the largest number into $a0 to print
+li $v0, 1
+syscall # Print the largest number
+
+li $v0, 4
+la $a0, str6
+syscall # Print out the message for the smallest number
+
+addi $a0, $t2, 0 # Add the smallest number into $a0 to print
+li $v0, 1
+syscall # Print the smallest number
+
+bne $v0, $zero, ProgramEnd
+
+End2:
+
+## We have $t0 > $t2 > $t1
+
+li $v0, 4
+la $a0, str5
+syscall # Print out the message for the largest number
+
+addi $a0, $t0, 0 # Add the largest number into $a0 to print
+li $v0, 1
+syscall # Print the largest number
+
+li $v0, 4
+la $a0, str6
+syscall # Print out the message for the smallest number
+
+addi $a0, $t1, 0 # Add the smallest number into $a0 to print
+li $v0, 1
+syscall # Print the smallest number
+
+bne $v0, $zero, ProgramEnd
+
+End3:
+
+## We have $t2 > $t0 > $t1
+
+li $v0, 4
+la $a0, str5
+syscall # Print out the message for the largest number
+
+addi $a0, $t2, 0 # Add the largest number into $a0 to print
+li $v0, 1
+syscall # Print the largest number
+
+li $v0, 4
+la $a0, str6
+syscall # Print out the message for the smallest number
+
+addi $a0, $t1, 0 # Add the smallest number into $a0 to print
+li $v0, 1
+syscall # Print the smallest number
+
+bne $v0, $zero, ProgramEnd
+
+End4:
+
+## We have $t2 > $t1 > $t0
+
+li $v0, 4
+la $a0, str5
+syscall # Print out the message for the largest number
+
+addi $a0, $t2, 0 # Add the largest number into $a0 to print
+li $v0, 1
+syscall # Print the largest number
+
+li $v0, 4
+la $a0, str6
+syscall # Print out the message for the smallest number
+
+addi $a0, $t0, 0 # Add the smallest number into $a0 to print
+li $v0, 1
+syscall # Print the smallest number
+
+bne $v0, $zero, ProgramEnd
+
+End5:
+
+## We have $t1 > $t2 > $t0
+
+li $v0, 4
+la $a0, str5
+syscall # Print out the message for the largest number
+
+addi $a0, $t1, 0 # Add the largest number into $a0 to print
+li $v0, 1
+syscall # Print the largest number
+
+li $v0, 4
+la $a0, str6
+syscall # Print out the message for the smallest number
+
+addi $a0, $t0, 0 # Add the smallest number into $a0 to print
+li $v0, 1
+syscall # Print the smallest number
+
+bne $v0, $zero, ProgramEnd
+
+End6:
+
+## We have $t1 > $t0 > $t2
+
+li $v0, 4
+la $a0, str5
+syscall # Print out the message for the largest number
+
+addi $a0, $t1, 0 # Add the largest number into $a0 to print
+li $v0, 1
+syscall # Print the largest number
+
+li $v0, 4
+la $a0, str6
+syscall # Print out the message for the smallest number
+
+addi $a0, $t2, 0 # Add the smallest number into $a0 to print
+li $v0, 1
+syscall # Print the smallest number
+
+bne $v0, $zero, ProgramEnd
+
+ProgramEnd:
+li $v0, 10
+syscall
